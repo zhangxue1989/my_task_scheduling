@@ -34,7 +34,7 @@ public class DemoController {
 		
 		model.addAttribute("cur_time", new Date());
 		
-		return "/system/dashboard";
+		return "/jsp/demo.jsp";
 	}
 	
 }
