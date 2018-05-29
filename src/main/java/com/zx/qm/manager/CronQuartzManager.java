@@ -1,6 +1,9 @@
 package com.zx.qm.manager;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.quartz.Job;
@@ -12,12 +15,28 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
+import org.quartz.Trigger.TriggerState;
 import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.impl.triggers.CronTriggerImpl;
 
+import com.zx.qm.model.JobInfo;
 import com.zx.qm.util.Assert;
+import com.zx.qm.util.TriggerStateUtil;
 
+/**
+ * @Project: my_task_scheduling
+ * @Title: CronQuartzManager
+ * @Description: 时间表达式，任务管理类。
+ * 	jobGroup 和 triggerGroup 默认不用写，统一管理。
+ *  jobName 和 triggerName 默认输入值是一样的，输出值不同。
+ * @author: zhangxue
+ * @date: 2018年5月29日下午9:52:31
+ * @company: yooli
+ * @Copyright: Copyright (c) 2015
+ * @version v1.0
+ */
 public  class CronQuartzManager extends AbstractQuartzManager {
 
 	public static final SchedulerFactory STD_SCHEDULER_FACTORY;
@@ -46,7 +65,7 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @date 2017-7-26 下午03:47:44
 	 * @version V2.0
 	 */
-	public static boolean addJob(String jobName, Class<? extends Job> jobClass, String cron, Map<String, String> params) throws Exception {
+	public static boolean addJob(String jobName, Class<? extends Job> jobClass, String cron, Map<String, Object> params) throws Exception {
 		return addJob(jobName, DEFAULT_CRON_JOB_GROUP_NAME, jobName, DEFAULT_CRON_TRIGGER_GROUP_NAME, jobClass, cron, params);
 	}
 
@@ -64,7 +83,7 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @throws Exception 
 	 */
 	private static boolean addJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName,
-			Class<? extends Job> jobClass, String cron, Map<String, String> params) throws Exception {
+			Class<? extends Job> jobClass, String cron, Map<String, Object> params) throws Exception {
 		if(Assert.isEmpty(jobName, jobGroupName, triggerName, triggerGroupName, cron) || Assert.isEmpty(jobClass)) {
 			return false;
 		}
@@ -304,6 +323,48 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 		return true;
 	}
 	
+	/**
+	 * @Title: 获得所有任务的信息
+	 * @return
+	 * @throws SchedulerException
+	 * @Description: TODO
+	 * @date: 2018年5月29日下午9:50:59
+	 */
+	public static List<JobInfo> getAllJob() throws SchedulerException{
+		Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
+		List<JobInfo> resultList = new ArrayList<>(); 
+		if(!scheduler.isStarted()){
+			return resultList;
+		}
+		
+		for (String groupName : scheduler.getJobGroupNames()) {
+            for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
+            	JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+            	
+            	String jobName = jobKey.getName();
+                String jobGroup = jobKey.getGroup();
+                Map<String, Object> params = jobDetail.getJobDataMap().getWrappedMap();
+                Class<? extends Job> jobClass = jobDetail.getJobClass();
+                String jobClassName = jobClass.getName();
+                String jobClassSimleName = jobClass.getSimpleName();
+                
+                List<CronTriggerImpl> triggers = (List<CronTriggerImpl>) scheduler.getTriggersOfJob(jobKey);
+                Date nextFireTime = triggers.get(0).getNextFireTime();//获得下一次任务触发时间
+                CronTriggerImpl trigger = triggers.get(0);
+                String triggerName = trigger.getKey().getName();
+                String triggerGroupName = trigger.getKey().getGroup();
+                String corn = trigger.getCronExpression();
+
+                TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
+                String status = TriggerStateUtil.getStatus(triggerState);
+                
+                JobInfo jobInfo = new JobInfo(jobName, jobGroup, triggerName, triggerGroupName, corn, jobClassName, jobClassSimleName, nextFireTime, params);
+                jobInfo.setJobStatus(status);
+                resultList.add(jobInfo);
+            }
+        }
+		return resultList;
+	}
 	
 	
 }

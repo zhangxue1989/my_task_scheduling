@@ -3,12 +3,14 @@ package com.zx.qm;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
 
-import com.zx.manager.QuartzJob;
+import com.zx.job.QuartzJob;
 import com.zx.qm.manager.CronQuartzManager;
+import com.zx.qm.model.JobInfo;
 
 import junit.framework.TestCase;
 
@@ -149,7 +151,7 @@ public class CronQuartzManagerTest extends TestCase {
 		boolean b1 = CronQuartzManager.addJob("测试7_AAA", QuartzJob.class, "0/2 * * * * ?", null);
 		Assert.assertEquals(b1, true);
 		
-		boolean existsJob = CronQuartzManager.isExistsJob("测试7_AAA");
+		boolean existsJob = CronQuartzManager.isExistsTrigger("测试7_AAA");
 		Assert.assertEquals(existsJob, true);
 		try {
 			System.in.read();
@@ -159,7 +161,7 @@ public class CronQuartzManagerTest extends TestCase {
 	}
 
 	/**
-	 * 
+	 * 测试暂停某个任务
 	 * @throws Exception
 	 * @author: xue.zhang
 	 * @date 2018年5月29日下午5:00:36
@@ -180,7 +182,12 @@ public class CronQuartzManagerTest extends TestCase {
 		
 		System.in.read();
 	}
-
+	
+	/**
+	 * @Title: 暂停某个任务后，再启动这个任务
+	 * @throws Exception
+	 * @date: 2018年5月29日下午9:22:27
+	 */
 	public void testStartJob() throws Exception {
 		CronQuartzManager.addJob("测试9_AAA", QuartzJob.class, "0/2 * * * * ?", null);
 		CronQuartzManager.addJob("测试9_BBB", QuartzJob.class, "0/2 * * * * ?", null);
@@ -192,13 +199,16 @@ public class CronQuartzManagerTest extends TestCase {
 		
 		System.in.read();
 	}
-
-	public void testGetJobName() {
+	
+	public void testGetAllJob() throws Exception{
+		CronQuartzManager.addJob("测试10_AAA", QuartzJob.class, "0/2 * * * * ?", null);
+		CronQuartzManager.addJob("测试10_BBB", QuartzJob.class, "0/2 * * * * ?", null);
 		
-	}
-
-	public void testGetTriggerName() {
+		List<JobInfo> allJob = CronQuartzManager.getAllJob();
 		
+		for (JobInfo jobInfo : allJob) {
+			System.out.println(jobInfo);
+		}
 	}
 
 }

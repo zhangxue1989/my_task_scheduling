@@ -4,16 +4,17 @@
 
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
+  	<!-- 防止定时任务加重两次 -->
   	<!-- Spring配置文件 -->
-	<context-param>
+	<!-- <context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath:application.xml</param-value>
-	</context-param>
+	</context-param> -->
 	
 	<!-- Spring监听器 -->
-	<listener>
+	<!-- <listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
+	</listener> -->
   
   	<!-- 添加对springmvc的支持 -->
 	<servlet>
