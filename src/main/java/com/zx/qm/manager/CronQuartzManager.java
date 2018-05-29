@@ -3,9 +3,6 @@ package com.zx.qm.manager;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.print.attribute.standard.JobName;
-
-import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -15,13 +12,10 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
-import org.quartz.Trigger.TriggerState;
 import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.triggers.CronTriggerImpl;
 
-import com.zx.manager.QuartzJob;
-import com.zx.qm.exception.TaskException;
 import com.zx.qm.util.Assert;
 
 public  class CronQuartzManager extends AbstractQuartzManager {
@@ -40,16 +34,6 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	
 	static {
 		STD_SCHEDULER_FACTORY= new StdSchedulerFactory();
-	}
-	
-	public static void main(String[] args) throws Exception {
-		boolean b1 = CronQuartzManager.addJob("2333", QuartzJob.class, "0/2 * * * * ?", null);
-		Map<String, String> params = new HashMap<>();
-    	params.put("k1", "v1");
-    	params.put("k2", "v2");
-		boolean b2 = CronQuartzManager.addJob("2333", QuartzJob.class, "0/2 * * * * ?", params);
-		System.out.println("b1=" + b1);
-		System.out.println("b2=" + b2);
 	}
 	
 	/**
@@ -142,6 +126,7 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 			if(trigger == null) {
 				return false;
 			}
+			/* quertz-1.6.3 版本支持的修改触发时间的方法。在2+以上的版本不兼容了。 
 			CronTriggerImpl cronTrigger = (CronTriggerImpl)trigger;
 			String oldCronExpression = cronTrigger.getCronExpression();
 			if (!oldCronExpression.equalsIgnoreCase(cron)) {
@@ -150,6 +135,14 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 				// 重启触发器
 				scheduler.resumeTrigger(triggerKey);
 			}
+			*/
+			// 新的触发器
+			CronTriggerImpl newTrigger = new CronTriggerImpl();
+			newTrigger.setName(getTriggerName(triggerName));
+			newTrigger.setGroup(triggerGroupName);
+			newTrigger.setCronExpression(cron);
+			
+			scheduler.rescheduleJob(triggerKey, newTrigger);
 			return true;
 		} catch (Exception e) {
 			throw e;
@@ -207,6 +200,7 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @version V2.0
 	 * @throws Exception 
 	 */
+	@Deprecated//无法使用，原理理解错误
 	public static boolean startJobs() throws Exception {
 		try {
 			Scheduler sched = STD_SCHEDULER_FACTORY.getScheduler();
@@ -239,7 +233,7 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	
 	/**
 	 * @Title:定时任务是否在运行 
-	 * @return
+	 * @return	当没有运行的项目或所有的任务都停止的时候，返回false。
 	 * @author: zhangx
 	 * @date: 2017年8月1日 下午7:09:56
 	 * @version v1.0
