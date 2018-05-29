@@ -12,16 +12,18 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;  
 import org.quartz.JobExecutionException;
 
+import com.zx.qm.manager.CronQuartzManager;
+
 
 public class QuartzJob implements Job {
 
 	@Override  
     public void execute(JobExecutionContext arg0) throws JobExecutionException { 
     	//获得参数
-//    	Set<Entry<String, String>> entrySet = arg0.getMergedJobDataMap().entrySet();
-//    	for (Entry<String, String> entry : entrySet) {
-//			System.out.println(entry.getKey() + "=" + entry.getValue());
-//		}
+    	Set<Entry<String, Object>> entrySet = arg0.getMergedJobDataMap().entrySet();
+    	for (Entry<String, Object> entry : entrySet) {
+			System.out.println(entry.getKey() + "=" + entry.getValue());
+		}
         System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())+ "★★★★★★★★★★★");    
     }  
     
@@ -34,32 +36,33 @@ public class QuartzJob implements Job {
             String job_name = "动态任务调度2333";  
             
             System.out.println("【系统启动】开始(每天早上10点开启)...");
-            QuartzManager.addJob(job_name, QuartzJob.class, "5 0/1 * * * ? ", params);
+            CronQuartzManager.addJob(job_name, QuartzJob.class, "5 0/1 * * * ? ", params);
            
-            System.out.println(QuartzManager.isRun());
-            Thread.sleep(10000);
+            System.out.println("【全部任务的状态】" + CronQuartzManager.isRun());
+            Thread.sleep(5000);
             
             System.out.println("【修改时间】开始(每2秒输出一次)...");
-            QuartzManager.modifyJobTime(job_name, "0/2 * * * * ?", params);    
+            CronQuartzManager.modifyJobTime(job_name, "0/2 * * * * ?", params);    
             
-            Thread.sleep(10000);
+            Thread.sleep(5000);
             System.out.println("【移除定时】开始...");
-            QuartzManager.removeJob(job_name);    
+            CronQuartzManager.removeJob(job_name);    
             System.out.println("【移除定时】成功");
               
             System.out.println("【再次添加定时任务】开始(每3秒输出一次)...");
-            QuartzManager.addJob(job_name, QuartzJob.class, "0/3 * * * * ?", params);
+            CronQuartzManager.addJob(job_name, QuartzJob.class, "0/3 * * * * ?", params);
             
-            Thread.sleep(10000);    
-            System.out.println("【移除定时】开始...");
-            QuartzManager.removeJob(job_name);    
-            System.out.println("【移除定时】成功");  
+            Thread.sleep(5000);    
+//            System.out.println("【移除定时】开始...");
+//            CronQuartzManager.removeJob(job_name);    
+//            System.out.println("【移除定时】成功");  
+            System.out.println("【全部任务的状态】" + CronQuartzManager.isRun());
+            CronQuartzManager.shutdownJobs();
+            System.out.println("【全部任务的状态】" + CronQuartzManager.isRun());
             
-            System.out.println(QuartzManager.isRun());
+            CronQuartzManager.startJobs();
+            System.out.println("【全部任务的状态】" + CronQuartzManager.isRun());
             
-            QuartzManager.shutdownJobs();
-            
-            System.out.println(QuartzManager.isRun());
         } catch (Exception e) {  
             e.printStackTrace();  
         }  
