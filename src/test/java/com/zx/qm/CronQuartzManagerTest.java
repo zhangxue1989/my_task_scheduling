@@ -48,7 +48,7 @@ public class CronQuartzManagerTest extends TestCase {
 	public void testModifyJobTime() throws Exception {
 		boolean b1 = CronQuartzManager.addJob("测试2_AAA", QuartzJob.class, "0/2 * * * * ?", null);
 		Assert.assertEquals(b1, true);
-		boolean b2 = CronQuartzManager.modifyJobTime("测试2_AAA", "0/3 * * * * ?", null);
+		boolean b2 = CronQuartzManager.modifyJobTime("测试2_AAA", "0/5 * * * * ?");
 		Assert.assertEquals(b2, true);
 		try {
 			System.in.read();

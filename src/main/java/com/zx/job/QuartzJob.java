@@ -18,7 +18,7 @@ public class QuartzJob implements Job {
     	for (Entry<String, Object> entry : entrySet) {
 			System.out.println(entry.getKey() + "=" + entry.getValue());
 		}
-        System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())+ "★★★★★★★★★★★");    
+        System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "2222222222222222");    
     }  
     
 }  

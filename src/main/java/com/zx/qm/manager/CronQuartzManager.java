@@ -122,7 +122,7 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @version V2.0
 	 * @throws Exception 
 	 */
-	public static boolean modifyJobTime(String jobName, String cron, Map<String, String> params) throws Exception {
+	public static boolean modifyJobTime(String jobName, String cron) throws Exception {
 		return modifyJobTime(jobName, DEFAULT_CRON_TRIGGER_GROUP_NAME, cron);
 	}
 	
@@ -324,18 +324,63 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	}
 	
 	/**
+	 * @Title: 获得任务信息
+	 * @return
+	 * @throws SchedulerException
+	 * @date: 2018年5月29日下午9:50:59
+	 */
+	@SuppressWarnings("unchecked")
+	public static JobInfo getJobInfo(String jobName) throws SchedulerException{
+		Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
+		/*if(!scheduler.isStarted()){
+			return resultList;
+		}*/
+		jobName = getJobName(jobName);
+		String jobGroup = DEFAULT_CRON_JOB_GROUP_NAME;
+		JobKey jobKey = new JobKey(jobName, jobGroup);
+		JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+		if(jobDetail == null)
+			return new JobInfo();
+		
+		Map<String, Object> params = jobDetail.getJobDataMap().getWrappedMap();
+		Class<? extends Job> jobClass = jobDetail.getJobClass();
+		String jobClassName = jobClass.getName();
+		String jobClassSimleName = jobClass.getSimpleName();
+		
+		List<CronTriggerImpl> triggers = (List<CronTriggerImpl>) scheduler.getTriggersOfJob(jobKey);
+		Date nextFireTime = triggers.get(0).getNextFireTime();//获得下一次任务触发时间
+		CronTriggerImpl trigger = triggers.get(0);
+		String triggerName = trigger.getKey().getName();
+		String triggerGroupName = trigger.getKey().getGroup();
+		String corn = trigger.getCronExpression();
+		
+		TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
+		String status = TriggerStateUtil.getStatus(triggerState);
+		
+		JobInfo jobInfo = new JobInfo(
+				jobName.split(":")[1], jobGroup, 
+				triggerName.split(":")[1], triggerGroupName, 
+				corn, 
+				jobClassName, jobClassSimleName, 
+				nextFireTime, params);
+		
+		jobInfo.setJobStatus(status);
+		
+		return jobInfo;
+	}
+	/**
 	 * @Title: 获得所有任务的信息
 	 * @return
 	 * @throws SchedulerException
-	 * @Description: TODO
 	 * @date: 2018年5月29日下午9:50:59
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<JobInfo> getAllJob() throws SchedulerException{
 		Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
 		List<JobInfo> resultList = new ArrayList<>(); 
-		if(!scheduler.isStarted()){
+		/*if(!scheduler.isStarted()){
 			return resultList;
-		}
+		}*/
 		
 		for (String groupName : scheduler.getJobGroupNames()) {
             for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
@@ -358,8 +403,15 @@ public  class CronQuartzManager extends AbstractQuartzManager {
                 TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
                 String status = TriggerStateUtil.getStatus(triggerState);
                 
-                JobInfo jobInfo = new JobInfo(jobName, jobGroup, triggerName, triggerGroupName, corn, jobClassName, jobClassSimleName, nextFireTime, params);
+                JobInfo jobInfo = new JobInfo(
+                		jobName.split(":")[1], jobGroup, 
+                		triggerName.split(":")[1], triggerGroupName, 
+                		corn, 
+                		jobClassName, jobClassSimleName, 
+                		nextFireTime, params);
+                
                 jobInfo.setJobStatus(status);
+                
                 resultList.add(jobInfo);
             }
         }
