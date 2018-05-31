@@ -25,11 +25,11 @@ public class InitJobBean implements InitializingBean {
 		Person person = new Person("No001", "张三");
 		params.put("person", person);
 		
-		boolean b1 = CronQuartzManager.addJob("测试1_用户任务", personJob, "0/1 * * * * ?", params);
+		boolean b1 = CronQuartzManager.addJob("测试1_用户任务", personJob, "0/10 * * * * ?", params);
 		System.out.println(b1);
 		
 		//任务二
-		boolean b2 = CronQuartzManager.addJob("测试2_简单任务", quartzJob, "0/1 * * * * ?", null);
+		boolean b2 = CronQuartzManager.addJob("测试2_简单任务", quartzJob, "0/10 * * * * ?", null);
 		System.out.println(b2);
 
 	}
