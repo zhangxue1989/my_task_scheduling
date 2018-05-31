@@ -54,6 +54,7 @@
 			</tr>
 		</c:forEach>
 	</table>
+	<a href="/shutdown">全部暂停</a>&nbsp;
 </body>
 <h1>${requestScope.msg }</h1>
 </html>

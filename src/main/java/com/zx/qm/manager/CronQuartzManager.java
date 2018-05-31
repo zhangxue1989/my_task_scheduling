@@ -231,8 +231,8 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	}
 
 	/**
-	 * @Description:关闭所有定时任务
-	 * @Title: QuartzManager.java
+	 * @Description:关闭所有定时任务,执行后全部任务被删除
+	 * @Title: QuartzManager
 	 * @author mzm
 	 * @date 2017-7-26 下午03:50:26
 	 * @version V2.0
@@ -244,6 +244,28 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 			if (!sched.isShutdown()) {
 				sched.shutdown();
 			}
+			return true;
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
+	/**
+	 * @Description:停止所有的任务,执行可再次被启动
+	 * @Title: QuartzManager
+	 * @author mzm
+	 * @date 2017-7-26 下午03:50:26
+	 * @version V2.0
+	 * @throws Exception 
+	 */
+	public static boolean stopJobs() throws Exception {
+		try {
+			Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
+			for (String groupName : scheduler.getJobGroupNames()) {
+	            for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
+	            	scheduler.pauseJob(jobKey);//暂停任务
+	            }
+	        }
 			return true;
 		} catch (Exception e) {
 			throw e;

@@ -1,7 +1,5 @@
 package com.zx.controller;
 
-
-import java.net.URLDecoder;
 import java.util.List;
 
 import org.quartz.SchedulerException;
@@ -11,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.zx.qm.manager.CronQuartzManager;
 import com.zx.qm.model.JobInfo;
-
 
 @Controller
 public class DemoController {
@@ -107,6 +104,22 @@ public class DemoController {
 			model.addAttribute("msg", "操作异常");
 		}
 		return "/update.jsp";
+	}
+	
+	@RequestMapping("/shutdown")
+	public String shutdown(Model model) {
+		try {
+			boolean bool = CronQuartzManager.stopJobs();
+			model.addAttribute("msg", bool ? "全部停止成功" : "全部停止失败");
+			
+			List<JobInfo> allJob = CronQuartzManager.getAllJob();
+			model.addAttribute("allJob", allJob);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			model.addAttribute("msg", "操作异常");
+		}
+		return "/index.jsp";
 	}
 	
 }
