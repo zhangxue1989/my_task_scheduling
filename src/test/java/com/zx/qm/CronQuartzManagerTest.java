@@ -10,7 +10,7 @@ import org.junit.Assert;
 
 import com.zx.job.QuartzJob;
 import com.zx.qm.manager.CronQuartzManager;
-import com.zx.qm.model.JobInfo;
+import com.zx.qm.model.CornJobInfo;
 
 import junit.framework.TestCase;
 
@@ -204,9 +204,9 @@ public class CronQuartzManagerTest extends TestCase {
 		CronQuartzManager.addJob("测试10_AAA", QuartzJob.class, "0/2 * * * * ?", null);
 		CronQuartzManager.addJob("测试10_BBB", QuartzJob.class, "0/2 * * * * ?", null);
 		
-		List<JobInfo> allJob = CronQuartzManager.getAllJob();
+		List<CornJobInfo> allJob = CronQuartzManager.getAllJob();
 		
-		for (JobInfo jobInfo : allJob) {
+		for (CornJobInfo jobInfo : allJob) {
 			System.out.println(jobInfo);
 		}
 	}

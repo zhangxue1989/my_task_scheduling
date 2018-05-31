@@ -21,7 +21,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.impl.triggers.CronTriggerImpl;
 
-import com.zx.qm.model.JobInfo;
+import com.zx.qm.model.CornJobInfo;
 import com.zx.qm.util.Assert;
 import com.zx.qm.util.TriggerStateUtil;
 
@@ -138,6 +138,10 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @throws Exception 
 	 */
 	private static boolean modifyJobTime(String triggerName, String triggerGroupName, String cron) throws Exception {
+		if(Assert.isEmpty(triggerName, triggerGroupName, cron)) {
+			return false;
+		}
+		
 		try {
 			Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
 			TriggerKey triggerKey = new TriggerKey(getTriggerName(triggerName), triggerGroupName);
@@ -183,7 +187,6 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 
 	/**
 	 * @Description: 移除一个任务
-	 * 
 	 * @param jobName
 	 * @param jobGroupName
 	 * @param triggerName
@@ -196,6 +199,10 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @throws Exception 
 	 */
 	private static boolean removeJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName) throws Exception {
+		if(Assert.isEmpty(jobName, jobGroupName, triggerName, triggerGroupName)) {
+			return false;
+		}
+		
 		try {
 			Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
 			
@@ -294,6 +301,9 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @date 2018年5月28日下午5:52:23
 	 */
 	public static boolean isExistsJob(String jobName) throws SchedulerException {
+		if(Assert.isEmpty(jobName)) {
+			return false;
+		}
 		Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
 		JobKey jobKey = new JobKey(getJobName(jobName), DEFAULT_CRON_JOB_GROUP_NAME);
 		return scheduler.checkExists(jobKey);
@@ -308,6 +318,9 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @date 2018年5月28日下午5:52:39
 	 */
 	public static boolean isExistsTrigger(String triggerName) throws SchedulerException {
+		if(Assert.isEmpty(triggerName)) {
+			return false;
+		}
 		Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
 		TriggerKey triggerKey = new TriggerKey(getTriggerName(triggerName), DEFAULT_CRON_TRIGGER_GROUP_NAME);
 		return scheduler.checkExists(triggerKey);
@@ -322,6 +335,10 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @date 2018年5月28日下午5:58:35
 	 */
 	public static boolean stopJob(String jobName) throws SchedulerException {
+		if(Assert.isEmpty(jobName)) {
+			return false;
+		}
+		
 		Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
 		JobKey jobKey = new JobKey(getJobName(jobName), DEFAULT_CRON_JOB_GROUP_NAME);
 		if(scheduler.isStarted()) {//任务管理器是开启的
@@ -339,6 +356,10 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @date 2018年5月28日下午5:58:35
 	 */
 	public static boolean startJob(String jobName) throws SchedulerException {
+		if(Assert.isEmpty(jobName)) {
+			return false;
+		}
+		
 		Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
 		JobKey jobKey = new JobKey(getJobName(jobName), DEFAULT_CRON_JOB_GROUP_NAME);
 		scheduler.resumeJob(jobKey);//重启任务
@@ -352,17 +373,18 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @date: 2018年5月29日下午9:50:59
 	 */
 	@SuppressWarnings("unchecked")
-	public static JobInfo getJobInfo(String jobName) throws SchedulerException{
+	public static CornJobInfo getJobInfo(String jobName) throws SchedulerException{
+		if(Assert.isEmpty(jobName)) {
+			return new CornJobInfo();
+		}
+		
 		Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
-		/*if(!scheduler.isStarted()){
-			return resultList;
-		}*/
 		jobName = getJobName(jobName);
 		String jobGroup = DEFAULT_CRON_JOB_GROUP_NAME;
 		JobKey jobKey = new JobKey(jobName, jobGroup);
 		JobDetail jobDetail = scheduler.getJobDetail(jobKey);
 		if(jobDetail == null)
-			return new JobInfo();
+			return new CornJobInfo();
 		
 		Map<String, Object> params = jobDetail.getJobDataMap().getWrappedMap();
 		Class<? extends Job> jobClass = jobDetail.getJobClass();
@@ -370,23 +392,36 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 		String jobClassSimleName = jobClass.getSimpleName();
 		
 		List<CronTriggerImpl> triggers = (List<CronTriggerImpl>) scheduler.getTriggersOfJob(jobKey);
-		Date nextFireTime = triggers.get(0).getNextFireTime();//获得下一次任务触发时间
-		CronTriggerImpl trigger = triggers.get(0);
-		String triggerName = trigger.getKey().getName();
-		String triggerGroupName = trigger.getKey().getGroup();
-		String corn = trigger.getCronExpression();
 		
-		TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
-		String status = TriggerStateUtil.getStatus(triggerState);
+		CornJobInfo jobInfo = new CornJobInfo();
 		
-		JobInfo jobInfo = new JobInfo(
-				jobName.split(":")[1], jobGroup, 
-				triggerName.split(":")[1], triggerGroupName, 
-				corn, 
-				jobClassName, jobClassSimleName, 
-				nextFireTime, params);
-		
-		jobInfo.setJobStatus(status);
+		if(Assert.isEmpty(triggers)){//该任务没有时间触发器
+			jobInfo = new CornJobInfo(
+					jobName.split(":")[1], jobGroup, 
+					"", "", 
+					"", 
+					jobClassName, jobClassSimleName, 
+					null, params);
+			jobInfo.setJobStatus("不存在");
+		} else {
+			Date nextFireTime = triggers.get(0).getNextFireTime();//获得下一次任务触发时间
+			CronTriggerImpl trigger = triggers.get(0);
+			String triggerName = trigger.getKey().getName();
+			String triggerGroupName = trigger.getKey().getGroup();
+			String corn = trigger.getCronExpression();
+			
+			TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
+			String status = TriggerStateUtil.getStatus(triggerState);
+			
+			jobInfo = new CornJobInfo(
+					jobName.split(":")[1], jobGroup, 
+					triggerName.split(":")[1], triggerGroupName, 
+					corn, 
+					jobClassName, jobClassSimleName, 
+					nextFireTime, params);
+			
+			jobInfo.setJobStatus(status);
+		}
 		
 		return jobInfo;
 	}
@@ -397,16 +432,16 @@ public  class CronQuartzManager extends AbstractQuartzManager {
 	 * @date: 2018年5月29日下午9:50:59
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<JobInfo> getAllJob() throws SchedulerException{
+	public static List<CornJobInfo> getAllJob() throws SchedulerException{
 		Scheduler scheduler = STD_SCHEDULER_FACTORY.getScheduler();
-		List<JobInfo> resultList = new ArrayList<>(); 
-		/*if(!scheduler.isStarted()){
-			return resultList;
-		}*/
+		List<CornJobInfo> resultList = new ArrayList<>(); 
 		
 		for (String groupName : scheduler.getJobGroupNames()) {
             for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
             	JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+            	
+            	if(jobDetail == null)//任务不存在
+        			continue;
             	
             	String jobName = jobKey.getName();
                 String jobGroup = jobKey.getGroup();
@@ -415,25 +450,35 @@ public  class CronQuartzManager extends AbstractQuartzManager {
                 String jobClassName = jobClass.getName();
                 String jobClassSimleName = jobClass.getSimpleName();
                 
+                CornJobInfo jobInfo = new CornJobInfo();
                 List<CronTriggerImpl> triggers = (List<CronTriggerImpl>) scheduler.getTriggersOfJob(jobKey);
-                Date nextFireTime = triggers.get(0).getNextFireTime();//获得下一次任务触发时间
-                CronTriggerImpl trigger = triggers.get(0);
-                String triggerName = trigger.getKey().getName();
-                String triggerGroupName = trigger.getKey().getGroup();
-                String corn = trigger.getCronExpression();
-
-                TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
-                String status = TriggerStateUtil.getStatus(triggerState);
-                
-                JobInfo jobInfo = new JobInfo(
-                		jobName.split(":")[1], jobGroup, 
-                		triggerName.split(":")[1], triggerGroupName, 
-                		corn, 
-                		jobClassName, jobClassSimleName, 
-                		nextFireTime, params);
-                
-                jobInfo.setJobStatus(status);
-                
+        		if(Assert.isEmpty(triggers)){//该任务没有时间触发器
+        			jobInfo = new CornJobInfo(
+        					jobName.split(":")[1], jobGroup, 
+        					"", "", 
+        					"", 
+        					jobClassName, jobClassSimleName, 
+        					null, params);
+        			jobInfo.setJobStatus("不存在");
+        		} else {
+        			Date nextFireTime = triggers.get(0).getNextFireTime();//获得下一次任务触发时间
+        			CronTriggerImpl trigger = triggers.get(0);
+        			String triggerName = trigger.getKey().getName();
+        			String triggerGroupName = trigger.getKey().getGroup();
+        			String corn = trigger.getCronExpression();
+        			
+        			TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
+        			String status = TriggerStateUtil.getStatus(triggerState);
+        			
+        			jobInfo = new CornJobInfo(
+        					jobName.split(":")[1], jobGroup, 
+        					triggerName.split(":")[1], triggerGroupName, 
+        					corn, 
+        					jobClassName, jobClassSimleName, 
+        					nextFireTime, params);
+        			
+        			jobInfo.setJobStatus(status);
+        		}
                 resultList.add(jobInfo);
             }
         }

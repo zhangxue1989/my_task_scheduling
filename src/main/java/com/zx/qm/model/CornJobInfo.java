@@ -6,14 +6,14 @@ import java.util.Map;
 /**
  * @Project: my_task_scheduling
  * @Title: JobInfo
- * @Description: 任务的详情
+ * @Description: 表达式任务的详情
  * @author: zhangxue
  * @date: 2018年5月29日下午9:38:28
  * @company: yooli
  * @Copyright: Copyright (c) 2015
  * @version v1.0
  */
-public class JobInfo {
+public class CornJobInfo {
 
 	private String jobName;
 
@@ -35,9 +35,9 @@ public class JobInfo {
 	
 	private String jobStatus;
 
-	public JobInfo() {	}
+	public CornJobInfo() {	}
 
-	public JobInfo(String jobName, String jobGroupName, String triggerName, String triggerGroupName, String corn,
+	public CornJobInfo(String jobName, String jobGroupName, String triggerName, String triggerGroupName, String corn,
 			String jobClass, String jobClassSimleName, Date nextFireTime, Map<String, Object> params) {
 		super();
 		this.jobName = jobName;

@@ -8,7 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.zx.qm.manager.CronQuartzManager;
-import com.zx.qm.model.JobInfo;
+import com.zx.qm.model.CornJobInfo;
 
 @Controller
 public class DemoController {
@@ -17,7 +17,7 @@ public class DemoController {
 	@RequestMapping("/allJob")
 	public String allJob(Model model) {
 		try {
-			List<JobInfo> allJob = CronQuartzManager.getAllJob();
+			List<CornJobInfo> allJob = CronQuartzManager.getAllJob();
 			model.addAttribute("allJob", allJob);
 		} catch (SchedulerException e) {
 			e.printStackTrace();
@@ -33,7 +33,7 @@ public class DemoController {
 			boolean bool = CronQuartzManager.stopJob(jobName);
 			model.addAttribute("msg", bool ? "停止成功" : "停止失败");
 			
-			List<JobInfo> allJob = CronQuartzManager.getAllJob();
+			List<CornJobInfo> allJob = CronQuartzManager.getAllJob();
 			model.addAttribute("allJob", allJob);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -49,7 +49,7 @@ public class DemoController {
 			boolean bool = CronQuartzManager.startJob(jobName);
 			model.addAttribute("msg", bool ? "启动成功" : "启动失败");
 			
-			List<JobInfo> allJob = CronQuartzManager.getAllJob();
+			List<CornJobInfo> allJob = CronQuartzManager.getAllJob();
 			model.addAttribute("allJob", allJob);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -65,7 +65,7 @@ public class DemoController {
 			boolean bool = CronQuartzManager.removeJob(jobName);
 			model.addAttribute("msg", bool ? "删除成功" : "删除失败");
 			
-			List<JobInfo> allJob = CronQuartzManager.getAllJob();
+			List<CornJobInfo> allJob = CronQuartzManager.getAllJob();
 			model.addAttribute("allJob", allJob);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -80,7 +80,7 @@ public class DemoController {
 	public String getJobInfo(Model model, String jobName) {
 		try {
 			jobName = new String(jobName.getBytes("ISO-8859-1"), "UTF-8");
-			JobInfo jobInfo = CronQuartzManager.getJobInfo(jobName);
+			CornJobInfo jobInfo = CronQuartzManager.getJobInfo(jobName);
 			model.addAttribute("jobInfo", jobInfo);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -96,7 +96,7 @@ public class DemoController {
 			boolean bool = CronQuartzManager.modifyJobTime(jobName, corn);
 			model.addAttribute("msg", bool ? "修改成功" : "修改失败");
 			
-			JobInfo jobInfo = CronQuartzManager.getJobInfo(jobName);
+			CornJobInfo jobInfo = CronQuartzManager.getJobInfo(jobName);
 			model.addAttribute("jobInfo", jobInfo);
 			
 		} catch (Exception e) {
@@ -112,7 +112,7 @@ public class DemoController {
 			boolean bool = CronQuartzManager.stopJobs();
 			model.addAttribute("msg", bool ? "全部停止成功" : "全部停止失败");
 			
-			List<JobInfo> allJob = CronQuartzManager.getAllJob();
+			List<CornJobInfo> allJob = CronQuartzManager.getAllJob();
 			model.addAttribute("allJob", allJob);
 			
 		} catch (Exception e) {
