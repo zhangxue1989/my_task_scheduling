@@ -16,7 +16,7 @@ import org.quartz.JobExecutionException;
  * 	注解 @DisallowConcurrentExecution 保证任务类，只能以单线程的方式去执行。
  * @author: zhangxue
  * @date: 2018年5月31日下午9:29:10
- * @company: yooli
+ * @company: alibaba
  * @Copyright: Copyright (c) 2015
  * @version v1.0
  */

@@ -6,7 +6,7 @@ package com.zx.qm.exception;
  * @Description: 任务调用统一异常
  * @author: xue.zhang
  * @date: 2018年5月28日下午4:53:47
- * @company: yooli
+ * @company: alibaba
  * @Copyright: Copyright (c) 2017
  * @version v1.0
  */

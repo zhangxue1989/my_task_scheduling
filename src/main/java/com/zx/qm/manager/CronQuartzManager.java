@@ -33,7 +33,7 @@ import com.zx.qm.util.TriggerStateUtil;
  *  jobName 和 triggerName 默认输入值是一样的，输出值不同。
  * @author: zhangxue
  * @date: 2018年5月29日下午9:52:31
- * @company: yooli
+ * @company: alibaba
  * @Copyright: Copyright (c) 2015
  * @version v1.0
  */

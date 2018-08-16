@@ -14,7 +14,7 @@ import org.quartz.Trigger.TriggerState;
 	PAUSED 		1	 暂停
  * @author: zhangxue
  * @date: 2018年5月29日下午9:44:09
- * @company: yooli
+ * @company: alibaba
  * @Copyright: Copyright (c) 2015
  * @version v1.0
  */
